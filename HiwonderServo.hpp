@@ -353,6 +353,7 @@ public:
   void setVoltageLimits(uint32_t lower, uint32_t upper) {
     lower = std::clamp<uint32_t>(lower, 4500, 14000);
     upper = std::clamp<uint32_t>(upper, lower + 1, 14000);
+    printf("Setting voltage limits to %i - %i\n", lower, upper);
     uint8_t params[] = {(uint8_t)lower, (uint8_t)(lower >> 8), (uint8_t)upper,
                         (uint8_t)(upper >> 8)};
     for (auto i = 0; i < 2; i++) {
@@ -363,6 +364,17 @@ public:
         return;
       }
     }
+  }
+
+  void getVoltageLimits(uint32_t &lower, uint32_t &upper) {
+    uint8_t params[4];
+    if (!_bus->read(HiwonderCommands::VIN_LIMIT_READ, params, 4, _id)) {
+      commandOK = false;
+      return;
+    }
+    commandOK = true;
+    lower = (params[0] | ((uint16_t)params[1] << 8));
+    upper = (params[2] | ((uint16_t)params[3] << 8));
   }
 
   int32_t getMinCentDegrees() { return minCentDegrees; }
