@@ -38,25 +38,38 @@ pico_sdk_init()
 
 # Add executable. Default name is the project name, version 0.1
 
-add_executable(set_servos set_servos.cpp HiwonderServo.cpp i2c_helpers.cpp)
 
-pico_set_program_name(set_servos "set_servos")
-pico_set_program_version(set_servos "0.1")
+function(add_exe_set_servos servo_num)
+ 
+add_executable(set_servo_${servo_num} set_servos.cpp HiwonderServo.cpp i2c_helpers.cpp)
+target_compile_definitions(set_servo_${servo_num} PRIVATE SERVO_NUM=${servo_num})
+pico_set_program_name(set_servo_${servo_num} "set_servo_${servo_num}")
+pico_set_program_version(set_servo_${servo_num} "0.1")
 
 # Modify the below lines to enable/disable output over UART/USB
-pico_enable_stdio_uart(set_servos 1)
-pico_enable_stdio_usb(set_servos 1)
+pico_enable_stdio_uart(set_servo_${servo_num} 1)
+pico_enable_stdio_usb(set_servo_${servo_num} 1)
 
 # Add the standard library to the build
-target_link_libraries(set_servos pico_stdlib)
+target_link_libraries(set_servo_${servo_num} pico_stdlib)
 
 # Add the standard include files to the build
-target_include_directories(set_servos PRIVATE ${CMAKE_CURRENT_LIST_DIR})
+target_include_directories(set_servo_${servo_num} PRIVATE ${CMAKE_CURRENT_LIST_DIR})
 
 # Add any user requested libraries
-target_link_libraries(set_servos hardware_timer hardware_clocks)
+target_link_libraries(set_servo_${servo_num} hardware_timer hardware_clocks)
 
-pico_add_extra_outputs(set_servos)
+pico_add_extra_outputs(set_servo_${servo_num})
+
+endfunction(add_exe_set_servos)
+
+
+foreach(servo_num RANGE 2 6)
+  add_exe_set_servos(${servo_num})
+  
+endforeach()
+
+
 
 # get data servo
 add_executable(get_data_servo get_data_servo.cpp HiwonderServo.cpp

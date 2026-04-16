@@ -5,8 +5,12 @@
 #include "pico/stdlib.h"
 #include <stdio.h>
 
-#define servo_num 2
 
+
+// #ifndef servo_num
+// #define servo_num 2
+// #endif
+#define servo_num SERVO_NUM
 typedef struct {
   uint8_t id;
   int16_t min;
@@ -94,7 +98,7 @@ int main() {
     }
     printf("Servo %i initialized\n", servos_settings.id);
     printf("current pos: %i\n", servo.pos_read());
-    servo.setVoltageLimits(voltage_limit_min * 100, voltage_limit_max * 100);
+    servo.setVoltageLimits(voltage_limit_min * 1000, voltage_limit_max * 1000);
     servo.setLimitsTicks(servos_settings.min / 24, servos_settings.max / 24);
     servo.angle_offset_adjust(0);
     printf("Servo %i calibrated with home %i, min %i, max %i\n",
