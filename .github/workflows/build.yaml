@@ -1,0 +1,46 @@
+name: Build
+
+on:
+    push:
+        branches: [ main, develop ]
+    pull_request:
+        branches: [ main, develop ]
+
+jobs:
+    build:
+        runs-on: ubuntu-latest
+        container: ghcr.io/arendjan/pico_docker_image:main
+
+        steps:
+        - uses: actions/checkout@v6
+        
+        - name: Build
+          run: |
+                mkdir build
+                cd build
+                cmake ..
+                make
+        
+        - name: install nodejs
+          run: |
+                apt update
+                apt install curl unzip -y
+                curl -fsSL https://deb.nodesource.com/setup_20.x -o nodesource_setup.sh
+                chmod +x nodesource_setup.sh
+                ./nodesource_setup.sh
+                apt-get install -y nodejs
+                node -v
+        - name: Upload artifacts
+          uses: actions/upload-artifact@v7
+          with:
+                name: build-artifacts
+                path: |
+                    build/**/*.uf2
+                    build/**/*.elf
+        - name: upload to release
+          if: startsWith(github.ref, 'refs/tags/')
+          uses: softprops/action-gh-release@v2
+          with:
+                files: build/**/*.uf2, build/**/*.elf
+          env:
+                GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
